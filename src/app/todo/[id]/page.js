@@ -65,15 +65,15 @@ export default function TodoDetail() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="text-center relative top-64">Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-center relative top-64">Error: {error}</div>;
   }
 
   if (!todo) {
-    return <div>Todo not found</div>;
+    return <div className="text-center relative top-64">Todo not found</div>;
   }
 
   return (
