@@ -5,7 +5,7 @@ import axios from "axios";
 
 const TodoItem = ({ todo, onUpdate, onDelete }) => {
   const [editing, setEditing] = useState(false);
-  const [title, setTitle] = useState(todo.title);
+  const [title, setTitle] = useState(todo);
 
   const handleUpdate = async () => {
     try {

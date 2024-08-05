@@ -1,8 +1,6 @@
 "use client";
 
 import axios from "axios";
-import { useState, useEffect } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
 export default function TodoDetail() {
