@@ -33,7 +33,7 @@ export default function TodoDetail() {
       );
       if (res.data && Object.keys(res.data).length > 0) {
         setTodo(res.data);
-        setTitle(res.data.title);
+        setTitle(res.data);
       } else {
         setError(`Todo with ID ${id} not found`);
       }
@@ -54,8 +54,8 @@ export default function TodoDetail() {
       const res = await axios.put(
         `https://jsonplaceholder.typicode.com/todos/${id}`,
         {
-          ...todo,
-          title,
+          todo,
+          // title,
         }
       );
       setTodo(res.data);
@@ -118,7 +118,7 @@ export default function TodoDetail() {
         ) : (
           <div className="sm:flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold">{todo.title}</h2>
+              {/* <h2 className="text-lg font-semibold">{todo}</h2> */}
               <p className="text-gray-600">
                 {todo.completed ? "Completed" : "Not completed"}
               </p>
