@@ -1,11 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 const TodoItem = ({ todo, onUpdate, onDelete }) => {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (todo && todo.title) {
+      setTitle(todo.title);
+    }
+  }, [todo]);
+
+  if (!todo) {
+    return <div>Loading...</div>;
+  }
 
   const handleUpdate = async () => {
     try {
@@ -20,6 +31,7 @@ const TodoItem = ({ todo, onUpdate, onDelete }) => {
       setEditing(false);
     } catch (err) {
       console.error("Error updating todo:", err);
+      setError("Error updating todo");
     }
   };
 
@@ -30,14 +42,18 @@ const TodoItem = ({ todo, onUpdate, onDelete }) => {
       );
       onDelete(todo.id);
     } catch (err) {
-      <p className="text-white bg-red-600 border-2 p-3 text-center mt-10">
-        Error deleting todo: {err}
-      </p>;
+      console.error("Error deleting todo:", err);
+      setError("Error deleting todo");
     }
   };
 
   return (
-    <div className="bg-transparent p-4 lg:w-[90%] m-auto  shadow rounded-lg mb-4">
+    <div className="bg-transparent p-4 lg:w-[90%] m-auto shadow rounded-lg mb-4">
+      {error && (
+        <p className="text-white bg-red-600 border-2 p-3 text-center mt-10">
+          {error}
+        </p>
+      )}
       {editing ? (
         <div className="flex items-center">
           <input

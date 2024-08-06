@@ -1,6 +1,8 @@
 "use client";
 
 import axios from "axios";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
 export default function TodoDetail() {
@@ -17,6 +19,9 @@ export default function TodoDetail() {
   useEffect(() => {
     if (id) {
       fetchTodo(id);
+    } else {
+      setError("No todo ID provided");
+      setLoading(false);
     }
   }, [id]);
 
@@ -26,12 +31,20 @@ export default function TodoDetail() {
       const res = await axios.get(
         `https://jsonplaceholder.typicode.com/todos/${id}`
       );
-      setTodo(res.data);
-      setTitle(res.data.title);
-      setLoading(false);
+      if (res.data && Object.keys(res.data).length > 0) {
+        setTodo(res.data);
+        setTitle(res.data.title);
+      } else {
+        setError(`Todo with ID ${id} not found`);
+      }
     } catch (err) {
       console.error("Error fetching todo:", err);
-      setError("Failed to fetch todo");
+      if (err.response && err.response.status === 404) {
+        setError(`Todo with ID ${id} not found`);
+      } else {
+        setError(`Failed to fetch todo: ${err.message}`);
+      }
+    } finally {
       setLoading(false);
     }
   };
@@ -50,6 +63,7 @@ export default function TodoDetail() {
       setEditing(false);
     } catch (err) {
       console.error("Error updating todo:", err);
+      setError(`Failed to update todo: ${err.message}`);
     }
   };
 
@@ -59,6 +73,7 @@ export default function TodoDetail() {
       router.push("/"); // Redirect to home page after deletion
     } catch (err) {
       console.error("Error deleting todo:", err);
+      setError(`Failed to delete todo: ${err.message}`);
     }
   };
 
@@ -67,7 +82,14 @@ export default function TodoDetail() {
   }
 
   if (error) {
-    return <div className="text-center relative top-64">Error: {error}</div>;
+    return (
+      <div className="text-center relative top-64">
+        <p className="text-red-500">{error}</p>
+        <Link href="/" className="text-blue-500 mt-4 block">
+          Back to Todo List
+        </Link>
+      </div>
+    );
   }
 
   if (!todo) {
@@ -77,7 +99,7 @@ export default function TodoDetail() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4 text-center">Todo Item Detail</h1>
-      <div className="bg-tranparent p-4 shadow rounded-lg">
+      <div className="bg-transparent p-4 shadow rounded-lg">
         {editing ? (
           <div className="flex items-center">
             <input
@@ -119,6 +141,9 @@ export default function TodoDetail() {
           </div>
         )}
       </div>
+      <Link href="/" className="block mt-4 text-center text-blue-500">
+        Back to Todo List
+      </Link>
     </div>
   );
 }
