@@ -1,14 +1,14 @@
 "use client";
 
-import Head from "next/head";
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import TodoItem from "./components/todItem/page";
-import TodoForm from "./components/todoForm/page";
+import Link from "next/link";
+import TodoPage from "./api/todos/[id]/route";
 
 export default function Home() {
   const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState("");
+  const [editingTodo, setEditingTodo] = useState(null);
 
   useEffect(() => {
     fetchTodos();
@@ -16,40 +16,134 @@ export default function Home() {
 
   const fetchTodos = async () => {
     try {
-      const res = await axios.get("https://jsonplaceholder.typicode.com/todos");
-      setTodos(res.data);
-    } catch (err) {
-      return (
-        <p className="text-white bg-red-600 border-2 p-3 text-center mt-10">
-          Error fetching todos {err}
-        </p>
-      );
+      const response = await axios.get("/api/todo");
+      setTodos(response.data);
+    } catch (error) {
+      console.error("Error fetching todos:", error);
     }
   };
 
-  const handleAddTodo = (newTodo) => {
-    setTodos([newTodo, ...todos]);
+  const addTodo = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("/api/todo", { title: newTodo });
+      setNewTodo("");
+      fetchTodos();
+    } catch (error) {
+      console.error("Error adding todo:", error);
+    }
+  };
+
+  const updateTodo = async (todo) => {
+    try {
+      await axios.put("/api/todo", todo);
+      setEditingTodo(null);
+      fetchTodos();
+    } catch (error) {
+      console.error("Error updating todo:", error);
+    }
+  };
+
+  const deleteTodo = async (id) => {
+    try {
+      await axios.delete("/api/todo", { data: { id } });
+      fetchTodos();
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <Head>
-        <title>Todo List App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <h1 className="text-3xl font-bold mb-4 text-center">Todo List</h1>
-
-      <TodoForm onAdd={handleAddTodo} />
-
-      <div className="grid grid-cols-1  gap-4">
-        {todos.map((todo, index) => (
-          <div key={index}>
-            <Link href={`./todo/${todo.id}`}>
-              <TodoItem todo={todo} />
-            </Link>
-          </div>
-        ))}
+    <div className="flex h-screen w-auto items-center justify-center">
+      <div className="w-full h-full lg:w-[80%] lg:h-[90%] p-4 bg-slate-900 lg:rounded-2xl ">
+        <h1 className="text-4xl text-center font-bold py-5 text-white">
+          Todo List App
+        </h1>
+        <form
+          onSubmit={addTodo}
+          className="py-5 lg:flex lg:gap-x-10 justify-center text-center"
+        >
+          <input
+            type="text"
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            className=" rounded-md p-2 lg:p-0 bg-transparent border-2 text-white"
+            placeholder="New todo"
+          />
+          <button
+            type="submit"
+            className="m-4 bg-blue-500 text-white p-2 rounded"
+          >
+            Add Todo
+          </button>
+        </form>
+        <ul className="lg:flex flex-col items-center gap-2 py-3 justify-center">
+          {todos.map((todo) => (
+            <li
+              key={todo.id}
+              className="w-full lg:w-[80%]  flex mt-6 gap-10 justify-between"
+            >
+              {editingTodo?.id === todo.id ? (
+                <form onSubmit={() => updateTodo(editingTodo)}>
+                  <input
+                    type="text"
+                    value={editingTodo.title}
+                    onChange={(e) =>
+                      setEditingTodo({ ...editingTodo, title: e.target.value })
+                    }
+                    className="border p-1 mr-2"
+                  />
+                  <button
+                    type="submit"
+                    className="bg-green-500 text-white p-1 rounded mr-2"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingTodo(null)}
+                    className="bg-gray-500 text-white p-1 rounded"
+                  >
+                    Cancel
+                  </button>
+                </form>
+              ) : (
+                <div className=" w-full">
+                  <div className="lg:border lg:p-3 lg:rounded-2xl flex gap-4 justify-between">
+                    <Link
+                      href={`./todos/${todo.id}`}
+                      className="text-blue-500 hover:underline"
+                    >
+                      <TodoPage />
+                      <span className={todo.completed ? "line-through" : ""}>
+                        {todo.title}
+                      </span>
+                    </Link>
+                    <button
+                      onClick={() =>
+                        updateTodo({ ...todo, completed: !todo.completed })
+                      }
+                      className=" bg-yellow-500 text-white py-1 lg:px-5 rounded"
+                    >
+                      {todo.completed ? "Undo" : "Done"}
+                    </button>
+                    <button
+                      onClick={() => setEditingTodo(todo)}
+                      className=" bg-blue-500 text-white px-3 lg:p-2 lg:px-10 rounded"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteTodo(todo.id)}
+                      className=" bg-red-500 text-white px-2 lg:p-2 lg:px-10 rounded"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
