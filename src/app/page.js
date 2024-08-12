@@ -54,7 +54,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen w-auto items-center justify-center">
+    <div className="flex min-h-screen w-auto items-center justify-center">
       <div className="w-full h-full lg:w-[80%] lg:h-[90%] p-4 bg-slate-900 lg:rounded-2xl ">
         <h1 className="text-4xl text-center font-bold py-5 text-white">
           Todo List App
